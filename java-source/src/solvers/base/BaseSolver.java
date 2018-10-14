@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import dtos.FlightDto;
+import dtos.ResultDto;
 import utils.CommonUtils;
 import utils.IOUtils;
 
@@ -13,6 +15,7 @@ public abstract class BaseSolver {
 	protected int regionsCount;
 	protected String startCity;
 	protected String startRegion;
+	protected ArrayList<String> regions = new ArrayList<String>();
 	protected HashMap<String, String> cityRegions = new HashMap<String, String>();
 	protected HashMap<String, HashMap<Integer, HashMap<String, List<List<String>>>>>
 		flights = new HashMap<String, HashMap<Integer, HashMap<String, List<List<String>>>>>();
@@ -39,10 +42,11 @@ public abstract class BaseSolver {
 			if (citiesInRegion.contains(startCity)) {
 				startRegion = region;
 			}
-			
+
 			for (String city : citiesInRegion) {
 				cityRegions.put(city, region);
 			}
+			regions.add(region);	
 		}
 
 		int flightRowCounter = regionsCount * 2 + regionCitiesPartShift;
@@ -85,5 +89,91 @@ public abstract class BaseSolver {
 		flightInfo.add(destinationAirport);
 		flightInfo.add(cost);
 		flights.get(departureAirport).get(dayOfFlight).get(cityRegions.get(destinationAirport)).add(flightInfo);
+	}
+
+	protected ResultDto createPseudoRandomSolution(String departureAirport, ArrayList<String> regionsToVisit, int day) {
+		return recreateSolution(departureAirport, regionsToVisit, day, null);
+	}
+
+	protected ResultDto recreateSolution(String departureAirport, ArrayList<String> regionsToVisit, int day, ResultDto tempSolution) {
+
+		String departureRegion = null;
+		if (tempSolution != null) {
+			departureRegion = cityRegions.get(tempSolution.getFlights().get(0).getDepartureAirport());
+		} else {
+			departureRegion = cityRegions.get(departureAirport);
+		}
+		ResultDto solution = null;
+		boolean solutionFound = false;
+
+		while (!solutionFound) {
+
+			solution = tempSolution != null ? tempSolution : new ResultDto();
+			boolean gotBackToOriginRegion = false;
+			int currentDay = day;
+			String currentAirport = departureAirport;
+	
+			while (!gotBackToOriginRegion) {
+				
+				HashMap<Integer, HashMap<String, List<List<String>>>> flightsFromAirport = flights.get(currentAirport);
+				if (flightsFromAirport == null) {
+					break;
+				}
+				HashMap<String, List<List<String>>> accessibleRegions = flightsFromAirport.get(currentDay);
+				ArrayList<List<String>> possibleFlights = new ArrayList<List<String>>();
+				
+				for (String desiredRegion : regionsToVisit) {
+					List<List<String>> flightsToDesiredRegion = accessibleRegions.get(desiredRegion);
+					if (flightsToDesiredRegion != null) {
+						possibleFlights.addAll(flightsToDesiredRegion);
+					}
+				}
+				
+				FlightDto nextFlight = getNextFlight(currentAirport, currentDay, possibleFlights);
+				if (nextFlight == null) {
+					break;
+				}
+				solution.addFlight(nextFlight);
+
+				if (regionsToVisit.contains(departureRegion)) {
+					gotBackToOriginRegion = true;
+				}
+
+				currentAirport = nextFlight.getDestinationAirport();
+				currentDay++;
+				regionsToVisit.remove(cityRegions.get(currentAirport));
+				if (regionsToVisit.isEmpty() && !gotBackToOriginRegion) {
+					regionsToVisit.add(departureRegion);
+				}
+			}
+			solutionFound = true;
+		}
+		return solution;
+	}
+
+	private FlightDto getNextFlight(String currentAirport, int currentDay, ArrayList<List<String>> possibleFlights) {
+		
+		FlightDto nextFlight = null;
+		boolean foundFlightIsValid = false;
+		while(!foundFlightIsValid) {
+
+			if (possibleFlights == null || possibleFlights.size() == 0) {
+				return null;
+			}
+
+			List<String> foundFlight = possibleFlights.get(
+					CommonUtils.getRandomNumberFromXtoY(0, possibleFlights.size() - 1));
+			
+			if (!isThisWayBlind(foundFlight)) {
+				nextFlight = new FlightDto(currentAirport, foundFlight.get(0), currentDay, foundFlight.get(1));
+				foundFlightIsValid = true;
+			}
+		}
+		return nextFlight;
+	}
+
+	private boolean isThisWayBlind(List<String> foundFlight) {
+		// TODO
+		return false;
 	}
 }

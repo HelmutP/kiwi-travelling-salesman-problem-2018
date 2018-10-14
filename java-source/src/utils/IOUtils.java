@@ -20,6 +20,7 @@ public final class IOUtils {
 
 		PrintWriter writer = new PrintWriter(OUTPUT_FOLDER + OUTPUT_FILE_NAME, "UTF-8");
 		boolean isFirstLine = true;
+
 		for (String line : lines) {
 			if (!isFirstLine) {
 				writer.println();

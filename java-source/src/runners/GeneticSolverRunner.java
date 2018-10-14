@@ -1,10 +1,15 @@
 package runners;
 
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
+
+import dtos.ResultDto;
 import solvers.genetic.GeneticSolver;
+import utils.IOUtils;
 
 public class GeneticSolverRunner {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
 
 		GeneticSolver solver = null;
 
@@ -15,6 +20,9 @@ public class GeneticSolverRunner {
 		} else {
 			throw new IllegalArgumentException();
 		}
+
+		ResultDto solution = solver.run();
+		IOUtils.saveResult(solution.getFormattedOutput());
 	}
 
 }

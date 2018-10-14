@@ -1,18 +1,17 @@
 package dtos;
 
-
-class Flight {
+public class FlightDto {
 
 	private String departureAirport;
 	private String destinationAirport;
 	private Integer dayOfFlight;
 	private Integer cost;
 
-	public Flight(String departureAirport, String destinationAirport, Integer dayOfFlight, String cost) {
+	public FlightDto(String departureAirport, String destinationAirport, Integer dayOfFlight, String cost) {
 		this(departureAirport, destinationAirport, dayOfFlight, Integer.parseInt(cost));
 	}
 
-	public Flight(String departureAirport, String destinationAirport, Integer dayOfFlight, Integer cost) {
+	public FlightDto(String departureAirport, String destinationAirport, Integer dayOfFlight, Integer cost) {
 		setDepartureAirport(departureAirport);
 		setDestinationAirport(destinationAirport);
 		setDayOfFlight(dayOfFlight);
@@ -22,25 +21,25 @@ class Flight {
 	public String getDepartureAirport() {
 		return departureAirport;
 	}
-	public void setDepartureAirport(String departureAirport) {
+	private void setDepartureAirport(String departureAirport) {
 		this.departureAirport = departureAirport;
 	}
 	public String getDestinationAirport() {
 		return destinationAirport;
 	}
-	public void setDestinationAirport(String destinationAirport) {
+	private void setDestinationAirport(String destinationAirport) {
 		this.destinationAirport = destinationAirport;
 	}
 	public Integer getDayOfFlight() {
 		return dayOfFlight;
 	}
-	public void setDayOfFlight(Integer dayOfFlight) {
+	private void setDayOfFlight(Integer dayOfFlight) {
 		this.dayOfFlight = dayOfFlight;
 	}
 	public Integer getCost() {
 		return cost;
 	}
-	public void setCost(Integer cost) {
+	private void setCost(Integer cost) {
 		this.cost = cost;
 	}
 }
