@@ -19,7 +19,8 @@ public abstract class BaseSolver {
 	protected HashMap<String, String> cityRegions = new HashMap<String, String>();
 	protected HashMap<String, HashMap<Integer, HashMap<String, List<List<String>>>>>
 		flights = new HashMap<String, HashMap<Integer, HashMap<String, List<List<String>>>>>();
-
+	private ArrayList<Integer> oneWayJourneysHashes = new ArrayList<Integer>();
+	
 	public BaseSolver(final String testCaseId) {
 		preprocessRawInputData(IOUtils.readInput(testCaseId));
 	}
@@ -129,8 +130,9 @@ public abstract class BaseSolver {
 					}
 				}
 				
-				FlightDto nextFlight = getNextFlight(currentAirport, currentDay, possibleFlights);
+				FlightDto nextFlight = getNextFlight(currentAirport, currentDay, possibleFlights, solution);
 				if (nextFlight == null) {
+					oneWayJourneysHashes.add(CommonUtils.hashJourney(solution, null, departureAirport, currentDay));
 					break;
 				}
 				solution.addFlight(nextFlight);
@@ -151,7 +153,7 @@ public abstract class BaseSolver {
 		return solution;
 	}
 
-	private FlightDto getNextFlight(String currentAirport, int currentDay, ArrayList<List<String>> possibleFlights) {
+	private FlightDto getNextFlight(String currentAirport, int currentDay, ArrayList<List<String>> possibleFlights, ResultDto solution) {
 		
 		FlightDto nextFlight = null;
 		boolean foundFlightIsValid = false;
@@ -164,16 +166,24 @@ public abstract class BaseSolver {
 			List<String> foundFlight = possibleFlights.get(
 					CommonUtils.getRandomNumberFromXtoY(0, possibleFlights.size() - 1));
 			
-			if (!isThisWayBlind(foundFlight)) {
+			if (!isThisWayBlind(solution, foundFlight, currentAirport, currentDay)) {
 				nextFlight = new FlightDto(currentAirport, foundFlight.get(0), currentDay, foundFlight.get(1));
 				foundFlightIsValid = true;
+			} else {
+				possibleFlights.remove(foundFlight);
 			}
 		}
 		return nextFlight;
 	}
 
-	private boolean isThisWayBlind(List<String> foundFlight) {
-		// TODO
+	private boolean isThisWayBlind(ResultDto solution, List<String> foundFlight, String departureAirport, Integer dayOfFlight) {
+		
+		if (foundFlight == null) {
+			throw new IllegalStateException();
+		}
+		if (oneWayJourneysHashes.contains(CommonUtils.hashJourney(solution, foundFlight, departureAirport, dayOfFlight))) {
+			return true;
+		}
 		return false;
 	}
 }

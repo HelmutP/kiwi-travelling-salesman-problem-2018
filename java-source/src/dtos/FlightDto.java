@@ -12,10 +12,18 @@ public class FlightDto {
 	}
 
 	public FlightDto(String departureAirport, String destinationAirport, Integer dayOfFlight, Integer cost) {
+
+		if (departureAirport == null || destinationAirport == null || dayOfFlight == null) {
+			throw new IllegalStateException();
+		}
 		setDepartureAirport(departureAirport);
 		setDestinationAirport(destinationAirport);
 		setDayOfFlight(dayOfFlight);
 		setCost(cost);
+	}
+
+	public String serialize() {
+		return getDepartureAirport()+getDestinationAirport()+getCost().toString()+getDayOfFlight().toString();
 	}
 
 	public String getDepartureAirport() {
