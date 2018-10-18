@@ -1,0 +1,13 @@
+python prijme 2 argumenty: nazov java suboru na spustenie a cislo testu na spustenie
+ak je cislo testu nespecifikovane, spustia sa vsetky cesty
+
+python run_test -absolute_path_to_java_file -cislo_testu (java-runners/)
+
+ulozit cestu k java suboru
+podla cisla testu nacitat test_inputX.txt
+ak nie je argument cislo_testu tak zbehnu vsetky testy
+cestu poslat do metody co spusta java subor
+ako argument k java suboru ide cislo testu
+merat cas
+ulozit vysledok do root/output nejaky kiwi_challenge_results
+porovnat s test-outputX
