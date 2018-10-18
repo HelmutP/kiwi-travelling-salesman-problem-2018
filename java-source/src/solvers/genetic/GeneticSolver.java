@@ -6,11 +6,12 @@ import dtos.ResultDto;
 import solvers.base.BaseSolver;
 
 public class GeneticSolver extends BaseSolver {
-
+	
 	public GeneticSolver(String testCaseId) {
 		super(testCaseId);
 	}
-	
+
+	@Override
 	public ResultDto run() {
 		System.out.println("LOOKING FOR AWESOME SOLUTION ...");
 
