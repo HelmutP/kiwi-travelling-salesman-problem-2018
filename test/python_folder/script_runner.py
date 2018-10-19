@@ -29,11 +29,11 @@ def chdir(path: str):
 
 
 def compare_outputs(output_path: str, solver_output_path: str, test_number: int) -> Optional[Any]:
-    file1 = '\\'.join([output_path, f'test{test_number}-output.txt'])
-    file2 = '\\'.join([solver_output_path, f'solver{test_number}-output.txt'])
+    output_file = '\\'.join([output_path, f'test{test_number}-output.txt'])
+    solver_output_file = '\\'.join([solver_output_path, f'solver{test_number}-output.txt'])
 
     try:
-        return filecmp.cmp(file1, file2)
+        return filecmp.cmp(output_file, solver_output_file)
     except FileNotFoundError:
         print(f'Unable to compare files: missing output or solver_output file')
         return None
