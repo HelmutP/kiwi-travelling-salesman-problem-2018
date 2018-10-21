@@ -32,11 +32,21 @@ def compare_outputs(output_path: str, solver_output_path: str, test_number: int)
     output_file = '\\'.join([output_path, f'test{test_number}-output.txt'])
     solver_output_file = '\\'.join([solver_output_path, f'solver{test_number}-output.txt'])
 
-    try:
-        return filecmp.cmp(output_file, solver_output_file)
-    except FileNotFoundError:
-        print(f'Unable to compare files: missing output or solver_output file')
+    if not os.path.isfile(output_file):
+        print(f'Unable to compare files: no main file available to compare solver result to in {output_path}')
         return None
+
+    if not os.path.isfile(solver_output_file):
+        print(f'Unable to compare files: no solver output file available in {solver_output_path}')
+        return None
+
+    return filecmp.cmp(output_file, solver_output_file)
+
+    # try:
+    #     return filecmp.cmp(output_file, solver_output_file)
+    # except FileNotFoundError:
+    #     print(f'Unable to compare files: missing output or solver_output file')
+    #     return None
 
 
 def run_java(java_file_path: str, test_number: int):
