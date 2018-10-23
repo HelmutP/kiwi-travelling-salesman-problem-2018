@@ -4,3 +4,4 @@ Debug
 .settings
 java-source/.classpath
 java-source/.gitignore
+/bin/

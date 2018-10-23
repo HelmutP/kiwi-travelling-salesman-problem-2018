@@ -9,10 +9,10 @@ import java.util.ArrayList;
 
 public final class IOUtils {
 
-	protected static final String OUTPUT_FOLDER = "../output/";
+	protected static final String OUTPUT_FOLDER = "output/";
 	protected static final String OUTPUT_FILE_NAME = "result-kiwi-challenge.txt";
 
-	protected static final String TESTS_INPUT_FOLDER = "../test/resources/input/";
+	protected static final String TESTS_INPUT_FOLDER = "test/resources/input/";
 	protected static final String TEST_INPUT_FILENAME_PATTERN = "test%s-input.txt";
 
 	public static void saveResult(final String[] lines) throws FileNotFoundException, UnsupportedEncodingException {
