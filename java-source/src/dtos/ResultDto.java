@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class ResultDto {
 
-	private Integer totalCost;
+	private Integer totalCost = Integer.valueOf(0);
 	private ArrayList<FlightDto> flights;
 
 	public ResultDto(Integer totalCost, ArrayList<FlightDto> flights) {
@@ -18,9 +18,14 @@ public class ResultDto {
 
 	public void addFlight(FlightDto newFlight) {
 		getFlights().add(newFlight);
+		updateTotalCost(newFlight);
 	}
 
-	private void recalculateTotalCost() {
+	private void updateTotalCost(FlightDto newFlight) {
+		totalCost += newFlight.getCost();
+	}
+
+	public void recalculateTotalCost() {
 		int newTotalCostSum = 0;
 		for (FlightDto flight : flights) {
 			newTotalCostSum += flight.getCost();
@@ -51,7 +56,6 @@ public class ResultDto {
 	}
 
 	public Integer getTotalCost() {
-		recalculateTotalCost();
 		return totalCost;
 	}
 	private void setTotalCost(Integer totalCost) {
