@@ -187,4 +187,6 @@ public abstract class BaseSolver {
 		}
 		return false;
 	}
+
+	public abstract ResultDto run();
 }

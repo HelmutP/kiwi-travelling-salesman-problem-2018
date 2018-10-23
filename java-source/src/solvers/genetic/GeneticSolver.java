@@ -6,7 +6,7 @@ import dtos.ResultDto;
 import solvers.base.BaseSolver;
 
 public class GeneticSolver extends BaseSolver {
-
+	
 	private static final int POPULATION_SIZE = 20;
 	private static final double MUTATION_RATE = 0.25;
 	private static final double ELIMINATION_RATE = 0.1;
@@ -15,7 +15,8 @@ public class GeneticSolver extends BaseSolver {
 	public GeneticSolver(String testCaseId) {
 		super(testCaseId);
 	}
-	
+
+	@Override
 	public ResultDto run() {
 		System.out.println("LOOKING FOR AWESOME SOLUTION USING EVOLUTION HAHA ...");
 

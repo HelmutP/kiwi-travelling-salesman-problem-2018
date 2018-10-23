@@ -3,26 +3,28 @@ package runners;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 
-import dtos.ResultDto;
+import runners.arguments.GeneticRunnerArgumentProcessor;
 import solvers.genetic.GeneticSolver;
-import utils.IOUtils;
 
-public class GeneticSolverRunner {
+public class GeneticSolverRunner extends BaseRunner{
 
 	public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
+		GeneticSolverRunner runner = new GeneticSolverRunner(args);
+		runner.run();
+	}
 
-		GeneticSolver solver = null;
+	public GeneticSolverRunner(String[] args) {
+		super(args);
+	}
+	
+	@Override
+	protected void initArgumentsProcessor(String[] args) {
+		argumentsProcessor = new GeneticRunnerArgumentProcessor(args);
+	}
 
-		if (args.length == 1) {
-			solver = new GeneticSolver(args[0]);
-		} else if (args.length == 0) {
-			solver = new GeneticSolver("0");
-		} else {
-			throw new IllegalArgumentException();
-		}
-
-		ResultDto solution = solver.run();
-		IOUtils.saveResult(solution.getFormattedOutput());
+	@Override
+	protected void initSolver() {
+		solver = new GeneticSolver(argumentsProcessor.getTestCaseId());
 	}
 
 }
