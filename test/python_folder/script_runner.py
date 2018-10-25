@@ -1,3 +1,20 @@
+"""
+Automated test script runner for Kiwi challenge 2018.
+
+Usage:
+    >python script_runner.py *ABSOLUTE_PATH_TO_JAR_FILE* *TEST_NUMBER*
+
+    - If test_number is not specified, all available tests are executed (according to the number
+      of test input files - max 10 .txt files)
+    - Absolute path to jar file MUST contain the .jar file to be executed (i.e. D:\foo\bar\file.jar)
+
+Requirements:
+    - Executable .jar file located in \jars
+    - Input text files with file name pattern 'testX-input.txt' located in \test\resources\input
+    - Output text files with expected result with file name pattern 'testX-output.txt' located in \test\resources\output
+    - Calculated routes with file name pattern 'solverX-output.txt' located in \test\resources\solver_output
+"""
+
 import os
 import sys
 import glob
@@ -49,21 +66,21 @@ def compare_outputs(output_path: str, solver_output_path: str, test_number: int)
     #     return None
 
 
-def run_java(java_file_path: str, test_number: int):
-    java_file = extract_file_name_from_abs_path(java_file_path)
-    abs_path = extract_file_path_from_abs_path(java_file_path)
+def run_java(jar_file_path: str, test_number: int):
+    jar_file = extract_file_name_from_abs_path(jar_file_path)
+    abs_path = extract_file_path_from_abs_path(jar_file_path)
 
     chdir(abs_path)
     start_time = time.clock()
     time.sleep(0.5)
-    # subprocess.check_call(['java', java_file, test_number], shell=True)
+    # subprocess.check_call(['java', '-jar', jar_file, test_number], shell=True)
     end_time = time.clock()
 
     print(f'Test number: {test_number}')
     print(f'Time elapsed: {end_time - start_time}')
 
 
-def start_testing(java_file_path: str, test_number: int):
+def start_testing(jar_file_path: str, test_number: int):
     input_path, output_path, solver_output_path = get_input_and_output_path()
 
     chdir(input_path)
@@ -72,7 +89,7 @@ def start_testing(java_file_path: str, test_number: int):
         print('No second argument specified, executing all tests...')
         print('-------------------------------------------------------')
         for test_number, _ in enumerate(glob.glob('test[0-9]-input.txt')):
-            run_java(java_file_path, test_number)
+            run_java(jar_file_path, test_number)
             print(f'Solution match: {compare_outputs(output_path, solver_output_path, test_number)}')
             print('-------------------------------------------------------')
 
@@ -82,7 +99,7 @@ def start_testing(java_file_path: str, test_number: int):
             return
     else:
         if os.path.isfile(f'test{test_number}-input.txt'):
-            run_java(java_file_path, test_number)
+            run_java(jar_file_path, test_number)
             print(f'Solution match: {compare_outputs(output_path, solver_output_path, test_number)}')
             print('-------------------------------------------------------')
 
@@ -96,9 +113,9 @@ if __name__ == "__main__":
     try:
         if len(sys.argv) == 2:
             sys.argv.append(-1)
-        java_file_path = str(sys.argv[1])  # contains .java file
+        jar_file_path = str(sys.argv[1])  # contains .jar file
         test_number = int(sys.argv[2])
 
-        start_testing(java_file_path, test_number)
+        start_testing(jar_file_path, test_number)
     except ValueError:
         print('Wrong input type! Expected: str, int')
