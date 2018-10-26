@@ -1,3 +1,17 @@
+"""
+Automated test script runner for Kiwi challenge 2018.
+Usage:
+    >python script_runner.py *ABSOLUTE_PATH_TO_JAR_FILE* *TEST_NUMBER*
+    - If test_number is not specified, all available tests are executed (according to the number
+      of test input files - max 10 .txt files)
+    - Absolute path to jar file MUST contain the .jar file to be executed (i.e. D:\foo\bar\file.jar)
+Requirements:
+    - Executable .jar file located in \jars
+    - Input text files with file name pattern 'testX-input.txt' located in \test\resources\input
+    - Output text files with expected result with file name pattern 'testX-output.txt' located in \test\resources\output
+    - Calculated routes with file name pattern 'solverX-output.txt' located in \test\resources\solver_output
+"""
+
 import os
 import sys
 import glob
@@ -28,7 +42,7 @@ def chdir(path: str):
     os.chdir(path)
 
 
-def compare_outputs(output_path: str, solver_output_path: str, test_number: int) -> Optional[Any]:
+def compare_outputs_and_calculate_score(output_path: str, solver_output_path: str, test_number: int) -> Optional[Any]:
     output_file = '\\'.join([output_path, f'test{test_number}-output.txt'])
     solver_output_file = '\\'.join([solver_output_path, f'solver{test_number}-output.txt'])
 
@@ -40,30 +54,54 @@ def compare_outputs(output_path: str, solver_output_path: str, test_number: int)
         print(f'Unable to compare files: no solver output file available in {solver_output_path}')
         return None
 
-    return filecmp.cmp(output_file, solver_output_file)
+    with open(output_file) as f:
+        base_price = int(f.readline())
 
-    # try:
-    #     return filecmp.cmp(output_file, solver_output_file)
-    # except FileNotFoundError:
-    #     print(f'Unable to compare files: missing output or solver_output file')
-    #     return None
+    with open(solver_output_file) as f:
+        solver_price = int(f.readline())
+
+    return {'base_price': base_price,
+            'solver_price': solver_price,
+            'file_match': filecmp.cmp(output_file, solver_output_file),
+            'final_score': round((base_price / solver_price) * 100, 2)}
 
 
-def run_java(java_file_path: str, test_number: int):
-    java_file = extract_file_name_from_abs_path(java_file_path)
-    abs_path = extract_file_path_from_abs_path(java_file_path)
-
+def run_java(jar_file_path: str, test_number: int):
+    jar_file = extract_file_name_from_abs_path(jar_file_path)
+    abs_path = extract_file_path_from_abs_path(jar_file_path)
     chdir(abs_path)
+
     start_time = time.clock()
-    time.sleep(0.5)
-    # subprocess.check_call(['java', java_file, test_number], shell=True)
+    try:
+        subprocess.check_call(['java', '-jar', jar_file, test_number], shell=True)
+    except:
+        print('Jar file could not be executed!')
+
     end_time = time.clock()
 
     print(f'Test number: {test_number}')
     print(f'Time elapsed: {end_time - start_time}')
 
 
-def start_testing(java_file_path: str, test_number: int):
+def run_test(jar_file_path: str, test_number: int, output_path: str, solver_output_path: str):
+    run_java(jar_file_path, test_number)
+    results = compare_outputs_and_calculate_score(output_path, solver_output_path, test_number)
+
+    print('Solution match: ' + str(results['file_match']))
+    if results['final_score'] > 100:
+        print('You found a cheaper route!')
+    elif results['final_score'] == 100:
+        print('You matched the base price')
+    else:
+        print('Your route is more expensive than the base price')
+
+    print('Base price: ' + str(results['base_price']))
+    print('Solver price: ' + str(results['solver_price']))
+    print('FINAL SCORE: ' + str(results['final_score']))
+    print('-------------------------------------------------------')
+
+
+def start_testing(jar_file_path: str, test_number: int):
     input_path, output_path, solver_output_path = get_input_and_output_path()
 
     chdir(input_path)
@@ -72,9 +110,7 @@ def start_testing(java_file_path: str, test_number: int):
         print('No second argument specified, executing all tests...')
         print('-------------------------------------------------------')
         for test_number, _ in enumerate(glob.glob('test[0-9]-input.txt')):
-            run_java(java_file_path, test_number)
-            print(f'Solution match: {compare_outputs(output_path, solver_output_path, test_number)}')
-            print('-------------------------------------------------------')
+            run_test(jar_file_path, test_number, output_path, solver_output_path)
 
         if test_number == -1:
             print(f'No input files with \'testX-input.txt\' format found in {os.getcwd()}')
@@ -82,9 +118,7 @@ def start_testing(java_file_path: str, test_number: int):
             return
     else:
         if os.path.isfile(f'test{test_number}-input.txt'):
-            run_java(java_file_path, test_number)
-            print(f'Solution match: {compare_outputs(output_path, solver_output_path, test_number)}')
-            print('-------------------------------------------------------')
+            run_test(jar_file_path, test_number, output_path, solver_output_path)
 
         else:
             print(f'File with test number {test_number} not found!')
@@ -96,9 +130,12 @@ if __name__ == "__main__":
     try:
         if len(sys.argv) == 2:
             sys.argv.append(-1)
-        java_file_path = str(sys.argv[1])  # contains .java file
+        jar_file_path = str(sys.argv[1])  # contains .jar file
         test_number = int(sys.argv[2])
 
-        start_testing(java_file_path, test_number)
+        start_testing(jar_file_path, test_number)
     except ValueError:
         print('Wrong input type! Expected: str, int')
+
+    return filecmp.cmp(output_file, solver_output_file)
+

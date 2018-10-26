@@ -109,6 +109,7 @@ public abstract class BaseSolver {
 
 		while (!solutionFound) {
 
+			ArrayList<String> regionsToVisitProcessing = new ArrayList<String>(regionsToVisit);
 			solution = tempSolution != null ? tempSolution : new ResultDto();
 			boolean gotBackToOriginRegion = false;
 			int currentDay = day;
@@ -123,7 +124,7 @@ public abstract class BaseSolver {
 				HashMap<String, List<List<String>>> accessibleRegions = flightsFromAirport.get(currentDay);
 				ArrayList<List<String>> possibleFlights = new ArrayList<List<String>>();
 				
-				for (String desiredRegion : regionsToVisit) {
+				for (String desiredRegion : regionsToVisitProcessing) {
 					List<List<String>> flightsToDesiredRegion = accessibleRegions.get(desiredRegion);
 					if (flightsToDesiredRegion != null) {
 						possibleFlights.addAll(flightsToDesiredRegion);
@@ -137,15 +138,15 @@ public abstract class BaseSolver {
 				}
 				solution.addFlight(nextFlight);
 
-				if (regionsToVisit.contains(departureRegion)) {
+				if (regionsToVisitProcessing.contains(departureRegion)) {
 					gotBackToOriginRegion = true;
 				}
 
 				currentAirport = nextFlight.getDestinationAirport();
 				currentDay++;
-				regionsToVisit.remove(cityRegions.get(currentAirport));
-				if (regionsToVisit.isEmpty() && !gotBackToOriginRegion) {
-					regionsToVisit.add(departureRegion);
+				regionsToVisitProcessing.remove(cityRegions.get(currentAirport));
+				if (regionsToVisitProcessing.isEmpty() && !gotBackToOriginRegion) {
+					regionsToVisitProcessing.add(departureRegion);
 				}
 			}
 			solutionFound = true;
