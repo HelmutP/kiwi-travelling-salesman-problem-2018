@@ -1,7 +1,8 @@
 """
 Automated test script runner for Kiwi challenge 2018.
 Usage:
-    >python script_runner.py *ABSOLUTE_PATH_TO_JAR_FILE* *TEST_NUMBER*
+    >python script_runner.py *ABSOLUTE_PATH_TO_JAR_FILE (IN PATH USE / NOT \\ OR \)* *TEST_NUMBER*
+    - Important - run it from /test folder
     - If test_number is not specified, all available tests are executed (according to the number
       of test input files - max 10 .txt files)
     - Absolute path to jar file MUST contain the .jar file to be executed (i.e. D:\foo\bar\file.jar)
@@ -23,19 +24,21 @@ from typing import Optional, Any
 
 def get_input_and_output_path() -> list:
     parent_path = os.path.dirname(os.path.abspath((os.path.dirname(__file__))))
-    input_path = parent_path + '\\resources\\input'
-    output_path = parent_path + '\\resources\\output'
-    solver_output_path = parent_path + '\\resources\\solver_output'
+    input_path = parent_path + '\\test\\resources\\input'
+    output_path = parent_path + '\\test\\resources\\output'
+    solver_output_path = parent_path + '\\test\\resources\\solver-output'
 
     return [input_path, output_path, solver_output_path]
 
 
 def extract_file_path_from_abs_path(path: str) -> str:
+    return '\\'.join(path.split('/')[:-1])
+
+def extract_jar_folder_from_abs_path(path: str) -> str:
     return '\\'.join(path.split('\\')[:-1])
 
-
 def extract_file_name_from_abs_path(path: str) -> str:
-    return path.split('\\')[-1]
+    return path.split('/')[-1]
 
 
 def chdir(path: str):
@@ -68,14 +71,12 @@ def compare_outputs_and_calculate_score(output_path: str, solver_output_path: st
 
 def run_java(jar_file_path: str, test_number: int):
     jar_file = extract_file_name_from_abs_path(jar_file_path)
-    abs_path = extract_file_path_from_abs_path(jar_file_path)
+    abs_path = extract_jar_folder_from_abs_path(extract_file_path_from_abs_path(jar_file_path))
     chdir(abs_path)
 
     start_time = time.clock()
-    try:
-        subprocess.check_call(['java', '-jar', jar_file, test_number], shell=True)
-    except:
-        print('Jar file could not be executed!')
+
+    subprocess.check_call('java -jar jars/'+jar_file+' '+str(test_number), shell=True)
 
     end_time = time.clock()
 
@@ -136,6 +137,4 @@ if __name__ == "__main__":
         start_testing(jar_file_path, test_number)
     except ValueError:
         print('Wrong input type! Expected: str, int')
-
-    return filecmp.cmp(output_file, solver_output_file)
 

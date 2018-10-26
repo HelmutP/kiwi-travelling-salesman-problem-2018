@@ -9,7 +9,7 @@ public final class SolverMock {
 	public static void main(String[] args) throws Exception {
 		pretendSomeActivity();
 
-		IOUtils.saveResult(createResultStructure());
+		IOUtils.saveResult(createResultStructure(), 999);
 		System.out.println("Output successfuly created!");
 	}
 

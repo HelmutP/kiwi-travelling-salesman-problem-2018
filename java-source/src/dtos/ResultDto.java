@@ -35,14 +35,8 @@ public class ResultDto {
 
 	public String[] getFormattedOutput() {
 		ArrayList<String> outputLinesList = new ArrayList<String>();
-		
-		String departureAirport = null;
-		if (getFlights() != null && getFlights().size() > 0) {
-			departureAirport = getFlights().get(0).getDepartureAirport();
-		} else {
-			throw new IllegalStateException();
-		}
-		outputLinesList.add(getTotalCost() + " " + departureAirport);
+
+		outputLinesList.add(getTotalCost().toString());
 		
 		for (FlightDto flight : getFlights()) {
 			outputLinesList.add(

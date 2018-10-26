@@ -9,15 +9,15 @@ import java.util.ArrayList;
 
 public final class IOUtils {
 
-	protected static final String OUTPUT_FOLDER = "output/";
-	protected static final String OUTPUT_FILE_NAME = "result-kiwi-challenge.txt";
+	protected static final String OUTPUT_FOLDER = "test/resources/solver-output/";
+	protected static final String OUTPUT_FILE_NAME_PATTERN = "solver%s-output.txt";
 
 	protected static final String TESTS_INPUT_FOLDER = "test/resources/input/";
 	protected static final String TEST_INPUT_FILENAME_PATTERN = "test%s-input.txt";
 
-	public static void saveResult(final String[] lines) throws FileNotFoundException, UnsupportedEncodingException {
+	public static void saveResult(final String[] lines, final int testCaseId) throws FileNotFoundException, UnsupportedEncodingException {
 
-		PrintWriter writer = new PrintWriter(OUTPUT_FOLDER + OUTPUT_FILE_NAME, "UTF-8");
+		PrintWriter writer = new PrintWriter(OUTPUT_FOLDER + String.format(OUTPUT_FILE_NAME_PATTERN, testCaseId), "UTF-8");
 		boolean isFirstLine = true;
 
 		for (String line : lines) {

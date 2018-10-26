@@ -31,16 +31,16 @@ public class GeneticSolverRunner extends BaseRunner {
 				throw new RuntimeException(e);
 			}
 		}
-		
-		ResultDto theBestSolution = null;
+
+		BaseRunner theBestSolutionRunner = null;
 		for (Entry<BaseRunner, Thread> threadRunnerPair : threads.entrySet()) {
-			if (theBestSolution == null ||
-					threadRunnerPair.getKey().solution.getTotalCost() < theBestSolution.getTotalCost()) {
-				theBestSolution = threadRunnerPair.getKey().solution;
+			if (theBestSolutionRunner == null ||
+					threadRunnerPair.getKey().solution.getTotalCost() < theBestSolutionRunner.solution.getTotalCost()) {
+				theBestSolutionRunner = threadRunnerPair.getKey();
 			}
 		}
 		
-		IOUtils.saveResult(theBestSolution.getFormattedOutput());
+		IOUtils.saveResult(theBestSolutionRunner.solution.getFormattedOutput(), Integer.valueOf(theBestSolutionRunner.getArgumentsProcessor().getTestCaseId()));
 	}
 
 	public GeneticSolverRunner(String[] args) {
