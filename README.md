@@ -66,7 +66,6 @@ Automatized test implemented as python script
  
  Last output for given input by any solver
 
-Folder used as storage for output data of run solver
 
 References
 ==========
