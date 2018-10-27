@@ -54,7 +54,7 @@ public class GeneticSolver extends BaseSolver {
 	}
 
 	private ArrayList<ResultDto> mutate(ArrayList<ResultDto> population) {
-		ArrayList<Integer> elementsToBeMutated = findElementsToBeMutated(false);
+		ArrayList<Integer> elementsToBeMutated = findElementsToBeMutated(true, population);
 		ArrayList<ResultDto> mutatedElements = new ArrayList<ResultDto>();
 		
 		for (int i = 0; i < elementsToBeMutated.size(); i++) {
@@ -103,12 +103,31 @@ public class GeneticSolver extends BaseSolver {
 		return mutatedElement;
 	}
 
-	private ArrayList<Integer> findElementsToBeMutated(boolean includeRoulette) {
+	private ArrayList<Integer> findElementsToBeMutated(boolean includeRoulette, ArrayList<ResultDto> population) {
 		ArrayList<Integer> elementsToMutate = new ArrayList<Integer>();
 		Integer numberOfElementsToMutate = (int) (POPULATION_SIZE * MUTATION_RATE);
 		
 		if (includeRoulette) {
+			ArrayList<Integer> roulette = new ArrayList<Integer>();
+			int totalCostOfPopulation = 0;
+			
+			for (ResultDto solutionDraft : population) {
+				totalCostOfPopulation += solutionDraft.getTotalCost().intValue();
+			}
 
+			for (int i = 0; i < POPULATION_SIZE; i++) {
+				int rouletteShare = (int) (((double) (totalCostOfPopulation - population.get(i).getTotalCost())) / ((double) (totalCostOfPopulation)) * 100.0 * (double) POPULATION_SIZE);
+				for (int j = 0; j < rouletteShare; j++) {
+					roulette.add(i);
+				}
+			}
+			
+			while(elementsToMutate.size() < numberOfElementsToMutate) {
+				Integer ruletteIndex = CommonUtils.getRandomNumberFromXtoY(0, roulette.size()-1);
+				if (!elementsToMutate.contains(roulette.get(ruletteIndex))) {
+					elementsToMutate.add(roulette.get(ruletteIndex));
+				}
+			}
 		} else {
 			while(elementsToMutate.size() < numberOfElementsToMutate) {
 				Integer randomIndexToBeMutated = CommonUtils.getRandomNumberFromXtoY(0, POPULATION_SIZE-1);
