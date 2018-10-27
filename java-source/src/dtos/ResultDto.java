@@ -58,8 +58,9 @@ public class ResultDto {
 	public ArrayList<FlightDto> getFlights() {
 		return flights;
 	}
-	private void setFlights(ArrayList<FlightDto> flights) {
+	public void setFlights(ArrayList<FlightDto> flights) {
 		this.flights = flights;
+		recalculateTotalCost();
 	}
 }
 

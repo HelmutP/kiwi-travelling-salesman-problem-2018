@@ -2,11 +2,9 @@ package runners;
 
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import dtos.ResultDto;
 import runners.arguments.GeneticRunnerArgumentProcessor;
 import solvers.genetic.GeneticSolver;
 import utils.IOUtils;

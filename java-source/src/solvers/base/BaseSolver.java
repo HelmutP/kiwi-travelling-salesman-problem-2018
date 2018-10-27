@@ -98,45 +98,80 @@ public abstract class BaseSolver {
 
 	protected ResultDto recreateSolution(String departureAirport, ArrayList<String> regionsToVisit, int day, ResultDto tempSolution) {
 
-		String departureRegion = null;
-		if (tempSolution != null) {
-			departureRegion = cityRegions.get(tempSolution.getFlights().get(0).getDepartureAirport());
+		String departureRegion = startRegion;
+		ArrayList<String> preProcessedRegionsToVisit = null;
+		if (tempSolution != null && tempSolution.getFlights().size() > 0) {
+			preProcessedRegionsToVisit = new ArrayList<String>(regionsToVisit);
+			for (FlightDto flight : tempSolution.getFlights()) {
+				preProcessedRegionsToVisit.remove(cityRegions.get(flight.getDepartureAirport()));
+				preProcessedRegionsToVisit.remove(cityRegions.get(flight.getDestinationAirport()));
+				if (preProcessedRegionsToVisit.size() == 0 && !cityRegions.get(tempSolution.getFlights().get(tempSolution.getFlights().size()-1).getDestinationAirport()).equals(departureRegion)) {
+					preProcessedRegionsToVisit.add(departureRegion);
+				}
+			}
 		} else {
-			departureRegion = cityRegions.get(departureAirport);
+			preProcessedRegionsToVisit = regionsToVisit;
 		}
 		ResultDto solution = null;
 		boolean solutionFound = false;
+		boolean algorithmRestarted = false;
 
 		while (!solutionFound) {
 
-			ArrayList<String> regionsToVisitProcessing = new ArrayList<String>(regionsToVisit);
-			solution = tempSolution != null ? tempSolution : new ResultDto();
+			ArrayList<String> regionsToVisitProcessing = null;
+			int currentDay = 1;
+			String currentAirport = null;
 			boolean gotBackToOriginRegion = false;
-			int currentDay = day;
-			String currentAirport = departureAirport;
-	
+
+			if (algorithmRestarted) {
+				regionsToVisitProcessing = new ArrayList<String>(regionsToVisit);
+				solution = new ResultDto();
+				currentAirport = startCity;
+			} else {
+				regionsToVisitProcessing = new ArrayList<String>(preProcessedRegionsToVisit);
+				solution = tempSolution != null ? tempSolution : new ResultDto();
+				currentDay = day;
+				currentAirport = tempSolution != null && tempSolution.getFlights().size() > 0
+						? tempSolution.getFlights().get(tempSolution.getFlights().size()-1).getDestinationAirport()
+						: departureAirport;
+				if (regionsToVisitProcessing.size() == 0) {
+					gotBackToOriginRegion = true;
+					solutionFound = true;
+				}
+			}
+
 			while (!gotBackToOriginRegion) {
-				
+
 				HashMap<Integer, HashMap<String, List<List<String>>>> flightsFromAirport = flights.get(currentAirport);
 				if (flightsFromAirport == null) {
+					oneWayJourneysHashes.add(CommonUtils.hashJourney(solution, null, departureAirport, currentDay));
+					algorithmRestarted = true;
 					break;
 				}
 				HashMap<String, List<List<String>>> accessibleRegions = flightsFromAirport.get(currentDay);
 				ArrayList<List<String>> possibleFlights = new ArrayList<List<String>>();
-				
-				for (String desiredRegion : regionsToVisitProcessing) {
-					List<List<String>> flightsToDesiredRegion = accessibleRegions.get(desiredRegion);
-					if (flightsToDesiredRegion != null) {
-						possibleFlights.addAll(flightsToDesiredRegion);
+				FlightDto nextFlight = null;
+
+				if (accessibleRegions != null) {
+					for (String desiredRegion : regionsToVisitProcessing) {
+						List<List<String>> flightsToDesiredRegion = accessibleRegions.get(desiredRegion);
+						if (flightsToDesiredRegion != null) {
+							possibleFlights.addAll(flightsToDesiredRegion);
+						}
 					}
-				}
-				
-				FlightDto nextFlight = getNextFlight(currentAirport, currentDay, possibleFlights, solution);
-				if (nextFlight == null) {
+					
+					nextFlight = getNextFlight(currentAirport, currentDay, possibleFlights, solution);
+					if (nextFlight == null) {
+						oneWayJourneysHashes.add(CommonUtils.hashJourney(solution, null, departureAirport, currentDay));
+						algorithmRestarted = true;
+						break;
+					}
+					solution.addFlight(nextFlight);
+				} else {
 					oneWayJourneysHashes.add(CommonUtils.hashJourney(solution, null, departureAirport, currentDay));
+					algorithmRestarted = true;
 					break;
 				}
-				solution.addFlight(nextFlight);
 
 				if (regionsToVisitProcessing.contains(departureRegion)) {
 					gotBackToOriginRegion = true;
@@ -148,8 +183,11 @@ public abstract class BaseSolver {
 				if (regionsToVisitProcessing.isEmpty() && !gotBackToOriginRegion) {
 					regionsToVisitProcessing.add(departureRegion);
 				}
+				if (regionsToVisitProcessing.isEmpty() && gotBackToOriginRegion) {
+					solutionFound = true;
+					break;
+				}
 			}
-			solutionFound = true;
 		}
 		return solution;
 	}

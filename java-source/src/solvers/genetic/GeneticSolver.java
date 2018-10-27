@@ -3,15 +3,17 @@ package solvers.genetic;
 import java.util.ArrayList;
 import java.util.List;
 
+import dtos.FlightDto;
 import dtos.ResultDto;
 import solvers.base.BaseSolver;
+import utils.CommonUtils;
 
 public class GeneticSolver extends BaseSolver {
 	
-	private static final int POPULATION_SIZE = 20;
+	private static final int POPULATION_SIZE = 50;
 	private static final double MUTATION_RATE = 0.25;
 	private static final double ELIMINATION_RATE = 0.1;
-	private static final double TIME_LIMIT_MILISEC = 600000;
+	private static final double TIME_LIMIT_MILISEC = 60000;
 	private static final int IMPROVEMENT_CONVERGENCE_LIMIT = 1000;
 
 	private ResultDto theBestSolution = null;
@@ -35,14 +37,12 @@ public class GeneticSolver extends BaseSolver {
 		long startTime = System.currentTimeMillis();
 		int generationCounter = 1;
 		
-		while(populationImproving && ((System.currentTimeMillis() - startTime)) < TIME_LIMIT_MILISEC) {
+		while(populationImproving && (System.currentTimeMillis() - startTime) < TIME_LIMIT_MILISEC) {
 			System.out.println("CREATING GENERATION " + generationCounter + "...");
 			
 			evaluatePopulation(population);
-			// do mutations
+			population = mutate(population);
 			population = repopulateWeakest(population);
-			// eliminate weakest
-			// add new replacement for weakest
 			populationImproving = isPopulationStillImproving(theBestSolution.getTotalCost());
 
 			System.out.println("GENERATION " + generationCounter + " IS IMPROVED: " + populationImproving + " AND THE BEST SOLUTION HAS PRICE: " + theBestSolution.getTotalCost()+ ".");
@@ -53,6 +53,73 @@ public class GeneticSolver extends BaseSolver {
 		return theBestSolution;
 	}
 
+	private ArrayList<ResultDto> mutate(ArrayList<ResultDto> population) {
+		ArrayList<Integer> elementsToBeMutated = findElementsToBeMutated(false);
+		ArrayList<ResultDto> mutatedElements = new ArrayList<ResultDto>();
+		
+		for (int i = 0; i < elementsToBeMutated.size(); i++) {
+			ResultDto mutatedElement = new ResultDto(
+					Integer.valueOf(population.get(elementsToBeMutated.get(i)).getTotalCost().intValue()),
+					new ArrayList<FlightDto>(population.get(elementsToBeMutated.get(i)).getFlights()));
+			mutatedElement = stopJourneySooner(mutatedElement);
+			String restartDepartureAirport = 
+					mutatedElement.getFlights().size() > 0
+							? (mutatedElement.getFlights().get(mutatedElement.getFlights().size()-1)).getDestinationAirport()
+							: startCity;
+			mutatedElements.add(
+					recreateSolution(restartDepartureAirport, regionsToVisit, mutatedElement.getFlights().size()+1, mutatedElement));			
+		}
+		return integrateMutatedElementsWithPopulation(population, mutatedElements, elementsToBeMutated);
+	}
+
+	private ArrayList<ResultDto> integrateMutatedElementsWithPopulation(ArrayList<ResultDto> population,
+			ArrayList<ResultDto> mutatedElements, ArrayList<Integer> elementsToBeMutated) {
+		
+		ArrayList<ResultDto> newPopulation = new ArrayList<ResultDto>();
+		for (int i = 0; i < POPULATION_SIZE; i++) {
+			if (!elementsToBeMutated.contains(i)) {
+				newPopulation.add(population.get(i));
+			}
+		}
+		for (ResultDto mutatedElement : mutatedElements) {
+			newPopulation.add(mutatedElement);
+		}
+		return newPopulation;
+	}
+
+	private ResultDto stopJourneySooner(ResultDto mutatedElement) {
+		Integer dayToStopJourney = CommonUtils.getRandomNumberFromXtoY(1, mutatedElement.getFlights().size());
+		ArrayList<FlightDto> historyFlights = new ArrayList<FlightDto>(mutatedElement.getFlights());
+
+		mutatedElement.setFlights(new ArrayList<FlightDto>());
+		for (int i = 0; i < historyFlights.size(); i++) {
+			if (dayToStopJourney >= i+1) {
+				mutatedElement.addFlight(historyFlights.get(i));
+			} else {
+				break;
+			}
+		}
+		
+		return mutatedElement;
+	}
+
+	private ArrayList<Integer> findElementsToBeMutated(boolean includeRoulette) {
+		ArrayList<Integer> elementsToMutate = new ArrayList<Integer>();
+		Integer numberOfElementsToMutate = (int) (POPULATION_SIZE * MUTATION_RATE);
+		
+		if (includeRoulette) {
+
+		} else {
+			while(elementsToMutate.size() < numberOfElementsToMutate) {
+				Integer randomIndexToBeMutated = CommonUtils.getRandomNumberFromXtoY(0, POPULATION_SIZE-1);
+				if (!elementsToMutate.contains(randomIndexToBeMutated)) {
+					elementsToMutate.add(randomIndexToBeMutated);
+				}
+			}
+		}
+		return elementsToMutate;
+	}
+
 	private ArrayList<ResultDto> repopulateWeakest(ArrayList<ResultDto> population) {
 		ArrayList<ResultDto> repopulation = new ArrayList<ResultDto>();
 		for (int i = 0; i < POPULATION_SIZE; i++) {
@@ -61,8 +128,7 @@ public class GeneticSolver extends BaseSolver {
 			}
 		}
 		for (Integer weakGuyindex : weakestGuysIndexes) {
-			repopulation.add(this.createPseudoRandomSolution(
-					repopulation.get(0).getFlights().get(0).getDepartureAirport(), regionsToVisit, 1));
+			repopulation.add(this.createPseudoRandomSolution(startCity, regionsToVisit, 1));
 		}
 		return repopulation;
 	}
@@ -106,8 +172,9 @@ public class GeneticSolver extends BaseSolver {
 			} else {
 				for (int j = 0; j < tempWeakestGuysIndexes.size(); j++) {
 					if (population.get(tempWeakestGuysIndexes.get(j)).getTotalCost() < result.getTotalCost()) {
-						tempWeakestGuysIndexes.remove(tempWeakestGuysIndexes.get(j));
+						tempWeakestGuysIndexes.remove(j);
 						tempWeakestGuysIndexes.add(i);
+						break;
 					}
 				}
 			}
