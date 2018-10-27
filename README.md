@@ -30,7 +30,7 @@ Slovak University of Technology, Bratislava, Slovakia
 Project structure
 =========
 
-**- jars**
+**jars**
 
 Runnable jars containing implementation of algorithms which solve Kiwi TSP Challenge 2018 problem. These jars are used in tests.
 
