@@ -5,3 +5,4 @@ Debug
 java-source/.classpath
 java-source/.gitignore
 /bin/
+test/resources/solver-output
