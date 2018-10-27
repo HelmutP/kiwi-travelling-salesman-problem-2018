@@ -30,39 +30,39 @@ Slovak University of Technology, Bratislava, Slovakia
 Project structure
 =========
 
-- jars
+**- jars**
 
 Runnable jars containing implementation of algorithms which solve Kiwi TSP Challenge 2018 problem. These jars are used in tests.
 
-- java-source/src
+**java-source/src**
 
 Java source code of Kiwi TSP Challenge 2018
 
-- java-source/src/dtos
+**java-source/src/dtos**
 
 Data transfer objects
 
-- java-source/src/runners
+**java-source/src/runners**
 
 Classes responsible for running solver, initialize multithreading and collect created results
 
-- java-source/src/solvers
+**java-source/src/solvers**
 
 Implementation of solution finder algorithms
 
-- java-source/src/utils
+**java-source/src/utils**
 
 Help static utility classes
 
-- test
+**test**
 
 Automatized test implemented as python script
 
- - test/resources/{input, output}
+ **test/resources/{input, output}**
  
  Test data (input, output)
  
- - test/resources/solver-output
+**test/resources/solver-output**
  
  Last output for given input by any solver
 
