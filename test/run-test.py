@@ -110,7 +110,7 @@ def start_testing(jar_file_path: str, test_number: int):
     if test_number == -1:
         print('No second argument specified, executing all tests...')
         print('-------------------------------------------------------')
-        for test_number, _ in enumerate(glob.glob('test[0-9]-input.txt')):
+        for test_number, _ in enumerate(glob.glob('test[0-3]-input.txt')):
             run_test(jar_file_path, test_number, output_path, solver_output_path)
 
         if test_number == -1:
