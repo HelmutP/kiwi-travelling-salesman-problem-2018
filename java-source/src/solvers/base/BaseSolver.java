@@ -9,20 +9,35 @@ import dtos.FlightDto;
 import dtos.ResultDto;
 import utils.CommonUtils;
 import utils.IOUtils;
+import utils.Timer;
 
 public abstract class BaseSolver {
 
 	protected int regionsCount;
 	protected String startCity;
 	protected String startRegion;
+
 	protected ArrayList<String> regions = new ArrayList<String>();
 	protected HashMap<String, String> cityRegions = new HashMap<String, String>();
 	protected HashMap<String, HashMap<Integer, HashMap<String, List<List<String>>>>>
 		flights = new HashMap<String, HashMap<Integer, HashMap<String, List<List<String>>>>>();
 	private ArrayList<Integer> oneWayJourneysHashes = new ArrayList<Integer>();
 	
+	public BaseSolver(int regionsCount, String startCity, String startRegion, ArrayList<String> regions,
+			HashMap<String, String> cityRegions,
+			HashMap<String, HashMap<Integer, HashMap<String, List<List<String>>>>> flights) {
+		super();
+		this.regionsCount = regionsCount;
+		this.startCity = startCity;
+		this.startRegion = startRegion;
+		this.regions = regions;
+		this.cityRegions = cityRegions;
+		this.flights = flights;
+	}
+
 	public BaseSolver(final String testCaseId) {
 		preprocessRawInputData(IOUtils.readInput(testCaseId));
+		Timer.setMaxProgramRunTime(regionsCount, cityRegions);
 	}
 
 	private void preprocessRawInputData(final ArrayList<String> readRawInputData) {
@@ -227,4 +242,60 @@ public abstract class BaseSolver {
 	}
 
 	public abstract ResultDto run();
+	
+	public int getRegionsCount() {
+		return regionsCount;
+	}
+
+	public void setRegionsCount(int regionsCount) {
+		this.regionsCount = regionsCount;
+	}
+
+	public String getStartCity() {
+		return startCity;
+	}
+
+	public void setStartCity(String startCity) {
+		this.startCity = startCity;
+	}
+
+	public String getStartRegion() {
+		return startRegion;
+	}
+
+	public void setStartRegion(String startRegion) {
+		this.startRegion = startRegion;
+	}
+
+	public ArrayList<String> getRegions() {
+		return regions;
+	}
+
+	public void setRegions(ArrayList<String> regions) {
+		this.regions = regions;
+	}
+
+	public HashMap<String, String> getCityRegions() {
+		return cityRegions;
+	}
+
+	public void setCityRegions(HashMap<String, String> cityRegions) {
+		this.cityRegions = cityRegions;
+	}
+
+	public HashMap<String, HashMap<Integer, HashMap<String, List<List<String>>>>> getFlights() {
+		return flights;
+	}
+
+	public void setFlights(HashMap<String, HashMap<Integer, HashMap<String, List<List<String>>>>> flights) {
+		this.flights = flights;
+	}
+
+	public ArrayList<Integer> getOneWayJourneysHashes() {
+		return oneWayJourneysHashes;
+	}
+
+	public void setOneWayJourneysHashes(ArrayList<Integer> oneWayJourneysHashes) {
+		this.oneWayJourneysHashes = oneWayJourneysHashes;
+	}
 }

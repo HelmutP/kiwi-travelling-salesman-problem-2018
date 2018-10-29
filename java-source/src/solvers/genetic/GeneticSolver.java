@@ -1,29 +1,36 @@
 package solvers.genetic;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import dtos.FlightDto;
 import dtos.ResultDto;
 import solvers.base.BaseSolver;
 import utils.CommonUtils;
+import utils.Timer;
 
 public class GeneticSolver extends BaseSolver {
 	
-	private static final int POPULATION_SIZE = 50;
+	private static final int POPULATION_SIZE = 20;
 	private static final double MUTATION_RATE = 0.25;
-	private static final double ELIMINATION_RATE = 0.1;
-	private static final double TIME_LIMIT_MILISEC = 60000;
-	private static final int IMPROVEMENT_CONVERGENCE_LIMIT = 1000;
+	private static final double ELIMINATION_RATE = 0.2;
+	private static final int IMPROVEMENT_CONVERGENCE_LIMIT = 300;
 
 	private ResultDto theBestSolution = null;
 	private ArrayList<Integer> weakestGuysIndexes = null;
 	private ArrayList<String> regionsToVisit = null;
-	
+
 	private List<Double> bestPricesOfPopulations = new ArrayList<Double>();
 
 	public GeneticSolver(String testCaseId) {
 		super(testCaseId);
+	}
+
+	public GeneticSolver(int regionsCount, String startCity, String startRegion, ArrayList<String> regions,
+			HashMap<String, String> cityRegions,
+			HashMap<String, HashMap<Integer, HashMap<String, List<List<String>>>>> flights) {
+		super(regionsCount, startCity, startRegion, regions, cityRegions, flights);
 	}
 
 	@Override
@@ -32,17 +39,28 @@ public class GeneticSolver extends BaseSolver {
 
 		regionsToVisit = initRegionsToVisit();
 		ArrayList<ResultDto> population = createPopulation(regionsToVisit);
-		
 		boolean populationImproving = true;
-		long startTime = System.currentTimeMillis();
 		int generationCounter = 1;
 		
-		while(populationImproving && (System.currentTimeMillis() - startTime) < TIME_LIMIT_MILISEC) {
+		System.out.println(Timer.getCurrentRunTime());
+		while(populationImproving && Timer.doWeHaveEnoughTimeToContinue()) {
 			System.out.println("CREATING GENERATION " + generationCounter + "...");
 			
 			evaluatePopulation(population);
+
+			if (!Timer.doWeHaveEnoughTimeToContinue()) {
+				break;
+			}
 			population = mutate(population);
+
+			if (!Timer.doWeHaveEnoughTimeToContinue()) {
+				break;
+			}
 			population = repopulateWeakest(population);
+
+			if (!Timer.doWeHaveEnoughTimeToContinue()) {
+				break;
+			}
 			populationImproving = isPopulationStillImproving(theBestSolution.getTotalCost());
 
 			System.out.println("GENERATION " + generationCounter + " IS IMPROVED: " + populationImproving + " AND THE BEST SOLUTION HAS PRICE: " + theBestSolution.getTotalCost()+ ".");
@@ -56,18 +74,27 @@ public class GeneticSolver extends BaseSolver {
 	private ArrayList<ResultDto> mutate(ArrayList<ResultDto> population) {
 		ArrayList<Integer> elementsToBeMutated = findElementsToBeMutated(true, population);
 		ArrayList<ResultDto> mutatedElements = new ArrayList<ResultDto>();
-		
+
 		for (int i = 0; i < elementsToBeMutated.size(); i++) {
 			ResultDto mutatedElement = new ResultDto(
 					Integer.valueOf(population.get(elementsToBeMutated.get(i)).getTotalCost().intValue()),
 					new ArrayList<FlightDto>(population.get(elementsToBeMutated.get(i)).getFlights()));
 			mutatedElement = stopJourneySooner(mutatedElement);
+
+			if (!Timer.doWeHaveEnoughTimeToContinue()) {
+				return population;
+			}
+			
 			String restartDepartureAirport = 
 					mutatedElement.getFlights().size() > 0
 							? (mutatedElement.getFlights().get(mutatedElement.getFlights().size()-1)).getDestinationAirport()
 							: startCity;
 			mutatedElements.add(
 					recreateSolution(restartDepartureAirport, regionsToVisit, mutatedElement.getFlights().size()+1, mutatedElement));			
+			
+			if (!Timer.doWeHaveEnoughTimeToContinue()) {
+				return population;
+			}
 		}
 		return integrateMutatedElementsWithPopulation(population, mutatedElements, elementsToBeMutated);
 	}
@@ -81,6 +108,11 @@ public class GeneticSolver extends BaseSolver {
 				newPopulation.add(population.get(i));
 			}
 		}
+		
+		if (!Timer.doWeHaveEnoughTimeToContinue()) {
+			return population;
+		}
+		
 		for (ResultDto mutatedElement : mutatedElements) {
 			newPopulation.add(mutatedElement);
 		}
@@ -215,5 +247,37 @@ public class GeneticSolver extends BaseSolver {
 		ArrayList<String> regionsToVisit = new ArrayList<String>(regions);
 		regionsToVisit.remove(startRegion);
 		return regionsToVisit;
+	}
+	
+	public ResultDto getTheBestSolution() {
+		return theBestSolution;
+	}
+
+	public void setTheBestSolution(ResultDto theBestSolution) {
+		this.theBestSolution = theBestSolution;
+	}
+
+	public ArrayList<String> getRegionsToVisit() {
+		return regionsToVisit;
+	}
+
+	public void setRegionsToVisit(ArrayList<String> regionsToVisit) {
+		this.regionsToVisit = regionsToVisit;
+	}
+
+	public static int getPopulationSize() {
+		return POPULATION_SIZE;
+	}
+
+	public static double getMutationRate() {
+		return MUTATION_RATE;
+	}
+
+	public static double getEliminationRate() {
+		return ELIMINATION_RATE;
+	}
+
+	public static int getImprovementConvergenceLimit() {
+		return IMPROVEMENT_CONVERGENCE_LIMIT;
 	}
 }
